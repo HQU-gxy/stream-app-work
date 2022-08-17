@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:work2/constants.dart';
 
 class Video extends StatefulWidget {
   const Video({Key? key}) : super(key: key);
@@ -15,19 +16,19 @@ class _VideoState extends State<Video> {
 
   @override
   void initState() {
+    _getData(
+        'https://qvs-live-hls.7g.jmxiazai.com:447/2xenzwm84dhv1/20220815202308150001.m3u8');
     super.initState();
-    _getData();
   }
 
-  _getData() {
-      _controller = VideoPlayerController.network(
-          'https://qvs-live-hls.7g.jmxiazai.com:447/2xenzwm84dhv1/20220815202308150001.m3u8')
-        ..initialize().then((_) {
-          // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-          setState(() {});
-        });
-      _controller.play();
-      _controller.setVolume(0.0);
+  void _getData(String address) {
+    _controller = VideoPlayerController.network(address)
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      });
+    _controller.play();
+    _controller.setVolume(0.0);
   }
 
   // Future<void> _onRefresh() async {
@@ -38,59 +39,44 @@ class _VideoState extends State<Video> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-        body: ListView(
-          padding:const EdgeInsets.fromLTRB(0, 0, 0, 100),
-          children: <Widget>[
-      SizedBox(
-        height: 1000,
-        child: Column(
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color.fromARGB(255, 3, 46, 140),
-                  width: 4.0,
-                ),
-              ),
-              child: Center(
-                child: _controller.value.isInitialized
-                    ? AspectRatio(
-                        aspectRatio: _controller.value.aspectRatio,
-                        child: VideoPlayer(_controller),
-                      )
-                    : _getMoreWidget(),
-              ),
-            ),
-          ],
-        ),
-      )
-    ]));
+        body: Container(
+      decoration: _controller.value.isInitialized
+          ? const BoxDecoration(color: Colors.black)
+          : const BoxDecoration(color: AppColors.main),
+      child: Center(
+        child: _controller.value.isInitialized
+            ? AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
+              )
+            : _loadingWidget(),
+      ),
+    ));
   }
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
-  Widget _getMoreWidget() {
+  Widget _loadingWidget() {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const <Widget>[
-            Text(
-              '加载中...',
-              style: TextStyle(fontSize: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            '加载中...',
+            style: TextStyle(
+              color: Colors.white // TODO: use theme
             ),
-            CircularProgressIndicator(
-              strokeWidth: 1.0,
-            )
-          ],
-        ),
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+          CircularProgressIndicator(color: Colors.blue.shade200, backgroundColor: Colors.blue.shade900,)
+        ],
       ),
     );
   }

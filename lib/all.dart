@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors_in_immutables
+import 'constants.dart';
 import 'home.dart';
 import 'video.dart';
 import 'package:flutter/material.dart';
@@ -45,26 +46,26 @@ class _AllState extends State<All> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.pink,
-      height: 1000,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: <Widget>[
-          Container(
-            width: 390,
-            height: 1000,
-            color: const Color.fromARGB(255, 3, 46, 140),
+    // TODO: how to use flex?
+    final w = MediaQuery.of(context).size.width;
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          child: Container(
+            color: AppColors.main,
             child: const Home(),
           ),
-          Container(
-            height: 1000,
-            width: 1401,
-            color: const Color.fromARGB(255, 3, 46, 140),
+        ),
+        Expanded(
+          flex: 2,
+          child: Container(
+            color: AppColors.main,
             child: const Video(),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

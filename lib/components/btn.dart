@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:work2/utils.dart';
+import 'package:work2/controlObj.dart';
 
 class StupidButton extends StatelessWidget {
   final ControlObject object;

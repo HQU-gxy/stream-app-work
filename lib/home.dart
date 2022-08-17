@@ -3,8 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:work2/components/btn.dart';
+import 'constants.dart';
 import 'logger.dart';
-import 'utils.dart';
+import 'controlObj.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
@@ -102,6 +103,13 @@ class _HomeState extends State<Home> {
       controlObjects[idx].onPressed = (() => setState(() => value()));
     });
     _socket();
+
+    // ensure only landscape orientation
+    WidgetsFlutterBinding.ensureInitialized();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight
+    ]);
     super.initState();
   }
 
@@ -135,13 +143,13 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 3, 46, 140),
+      backgroundColor: AppColors.main,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 3, 46, 140),
+        backgroundColor: AppColors.main,
         leading: ElevatedButton(
           style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(
-                  const Color.fromARGB(255, 3, 46, 140))),
+                  AppColors.main)),
           child: const Icon(Icons.settings),
           onPressed: () {
             Navigator.pushNamed(
@@ -151,33 +159,6 @@ class _HomeState extends State<Home> {
           },
         ),
         centerTitle: true,
-        title: ElevatedButton(
-          style: ButtonStyle(
-              elevation: MaterialStateProperty.all(0),
-              backgroundColor: MaterialStateProperty.all(
-                  const Color.fromARGB(255, 3, 46, 140))),
-          onPressed: (() {
-            setState(() {
-              undo = !undo;
-              if (undo) {
-                // 强制横屏
-                WidgetsFlutterBinding.ensureInitialized();
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.landscapeLeft,
-                  DeviceOrientation.landscapeRight
-                ]);
-              } else {
-                WidgetsFlutterBinding.ensureInitialized();
-                // 强制竖屏
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitUp,
-                  DeviceOrientation.portraitDown
-                ]);
-              }
-            });
-          }),
-          child: const Icon(Icons.screen_rotation),
-        ),
         actions: [
           Row(
             children: <Widget>[
@@ -202,126 +183,80 @@ class _HomeState extends State<Home> {
           )
         ],
       ),
-      body: ListView(padding: const EdgeInsets.all(20), children: <Widget>[
-        SizedBox(
-          height: 700,
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                flex: 2,
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                        child: Column(
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 53, 91, 162),
-                                //边框
-                                border: Border.all(
-                                    width: 2.0, color: Colors.white24),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(10))),
-                            height: 100,
-                            child: Stack(
-                              children: <Widget>[
-                                Positioned(
-                                  left: 10,
-                                  bottom: 10,
-                                  child: SizedBox(
-                                    height: 50,
-                                    width: 80,
-                                    child: Image.asset(
-                                      'images/wind_speed.png',
-                                      fit: BoxFit.fill,
+      body:
+      Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          // TODO: refactor this shit until I hove time
+          // DON'T USE MAGIC NUMBERS
+          children: <Widget>[
+            Expanded(
+              flex: 2,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                      child: Column(
+                        children: <Widget>[
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 53, 91, 162),
+                                  //边框
+                                  border: Border.all(
+                                      width: 2.0, color: Colors.white24),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10))),
+                              height: 100,
+                              child: Stack(
+                                children: <Widget>[
+                                  Positioned(
+                                    left: 10,
+                                    bottom: 10,
+                                    child: SizedBox(
+                                      height: 50,
+                                      width: 80,
+                                      child: Image.asset(
+                                        'images/wind_speed.png',
+                                        fit: BoxFit.fill,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '$windSpeed',
-                                    style: const TextStyle(
-                                        fontSize: 85, color: Colors.white),
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '$windSpeed',
+                                      style: const TextStyle(
+                                          fontSize: 85, color: Colors.white),
+                                    ),
                                   ),
-                                ),
-                                const Positioned(
-                                  right: 42,
-                                  top: 116,
-                                  child: Text('m/s',
-                                      style: TextStyle(
-                                          fontSize: 30, color: Colors.white)),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    )),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                        child: Container(
-                      decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 53, 91, 162),
-                          //边框
-                          border: Border.all(width: 2.0, color: Colors.white24),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10))),
-                      height: 100,
-                      child: Stack(
-                        children: <Widget>[
-                          Positioned(
-                            left: 10,
-                            bottom: 10,
-                            child: SizedBox(
-                              height: 37,
-                              width: 60,
-                              child: Image.asset(
-                                'images/door_height.png',
-                                fit: BoxFit.fill,
+                                  const Positioned(
+                                    right: 42,
+                                    top: 116,
+                                    child: Text('m/s',
+                                        style: TextStyle(
+                                            fontSize: 30, color: Colors.white)),
+                                  )
+                                ],
                               ),
                             ),
-                          ),
-                          Positioned(
-                              right: 30,
-                              bottom: 25,
-                              child: Text(
-                                '$doorHeight',
-                                style: const TextStyle(
-                                    fontSize: 45, color: Colors.white),
-                              )),
-                          const Positioned(
-                            right: 5,
-                            top: 0,
-                            child: Text('cm',
-                                style: TextStyle(
-                                    fontSize: 15, color: Colors.white)),
                           )
                         ],
-                      ),
-                    )),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Expanded(
+                      )),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
                       child: Container(
                         decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 53, 91, 162),
                             //边框
-                            border:
-                                Border.all(width: 2.0, color: Colors.white24),
+                            border: Border.all(width: 2.0, color: Colors.white24),
                             borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
+                            const BorderRadius.all(Radius.circular(10))),
                         height: 100,
                         child: Stack(
                           children: <Widget>[
@@ -332,7 +267,7 @@ class _HomeState extends State<Home> {
                                 height: 37,
                                 width: 60,
                                 child: Image.asset(
-                                  'images/air_valve.png',
+                                  'images/door_height.png',
                                   fit: BoxFit.fill,
                                 ),
                               ),
@@ -341,50 +276,94 @@ class _HomeState extends State<Home> {
                                 right: 30,
                                 bottom: 25,
                                 child: Text(
-                                  '$airValve',
+                                  '$doorHeight',
                                   style: const TextStyle(
                                       fontSize: 45, color: Colors.white),
                                 )),
                             const Positioned(
                               right: 5,
                               top: 0,
-                              child: Text('°',
+                              child: Text('cm',
                                   style: TextStyle(
-                                      fontSize: 30, color: Colors.white)),
+                                      fontSize: 15, color: Colors.white)),
                             )
                           ],
                         ),
+                      )),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 53, 91, 162),
+                          //边框
+                          border:
+                          Border.all(width: 2.0, color: Colors.white24),
+                          borderRadius:
+                          const BorderRadius.all(Radius.circular(10))),
+                      height: 100,
+                      child: Stack(
+                        children: <Widget>[
+                          Positioned(
+                            left: 10,
+                            bottom: 10,
+                            child: SizedBox(
+                              height: 37,
+                              width: 60,
+                              child: Image.asset(
+                                'images/air_valve.png',
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                              right: 30,
+                              bottom: 25,
+                              child: Text(
+                                '$airValve',
+                                style: const TextStyle(
+                                    fontSize: 45, color: Colors.white),
+                              )),
+                          const Positioned(
+                            right: 5,
+                            top: 0,
+                            child: Text('°',
+                                style: TextStyle(
+                                    fontSize: 30, color: Colors.white)),
+                          )
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: <Widget>[
-                    StupidButton(object: controlObjects[0]),
-                    StupidButton(object: controlObjects[1]),
-                    StupidButton(object: controlObjects[2]),
-                    StupidButton(object: controlObjects[3]),
-                  ],
-                ),
+            ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  StupidButton(object: controlObjects[0]),
+                  StupidButton(object: controlObjects[1]),
+                  StupidButton(object: controlObjects[2]),
+                  StupidButton(object: controlObjects[3]),
+                ],
               ),
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: <Widget>[
-                    StupidButton(object: controlObjects[4]),
-                    StupidButton(object: controlObjects[5]),
-                    StupidButton(object: controlObjects[6]),
-                    StupidButton(object: controlObjects[7]),
-                  ],
-                ),
-              )
-            ],
-          ),
-        )
-      ]),
+            ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  StupidButton(object: controlObjects[4]),
+                  StupidButton(object: controlObjects[5]),
+                  StupidButton(object: controlObjects[6]),
+                  StupidButton(object: controlObjects[7]),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 
