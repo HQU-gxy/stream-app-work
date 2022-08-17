@@ -174,7 +174,7 @@ class _HomeState extends State<Home> {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          // TODO: refactor this shit until I hove time
+          // TODO: refactor this shit until I have time
           // DON'T USE MAGIC NUMBERS
           children: <Widget>[
             Expanded(
