@@ -7,6 +7,7 @@ class StupidButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final em = MediaQuery.of(context).textScaleFactor;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -19,8 +20,8 @@ class StupidButton extends StatelessWidget {
           child: ClipOval(
             child: Image.asset(
               object.picture,
-              height: 50,
-              width: 50,
+              height: 35 * em, // magic number
+              width: 35 * em,
             ),
           ),
         ),
