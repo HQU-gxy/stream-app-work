@@ -50,20 +50,14 @@ class _AllState extends State<All> {
     final w = MediaQuery.of(context).size.width;
     return Flex(
       direction: Axis.horizontal,
-      children: <Widget>[
+      children: const [
         Expanded(
           flex: 1,
-          child: Container(
-            color: AppColors.main,
-            child: const Home(),
-          ),
+          child: Home(),
         ),
         Expanded(
           flex: 2,
-          child: Container(
-            color: AppColors.main,
-            child: const Video(),
-          ),
+          child: Video(),
         ),
       ],
     );
