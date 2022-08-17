@@ -6,43 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-class All extends StatefulWidget {
-  All({Key? key}) : super(key: key);
-
-  @override
-  State<All> createState() => _AllState();
-}
-
-class _AllState extends State<All> {
-  final channel =
-      IOWebSocketChannel.connect("ws://123.56.194.114:8081/UserWebSocket/user");
-  //初始化，连接websocket
-  @override
-  void initState() {
-    _socket();
-    super.initState();
-  }
-
-  void _socket() async {
-    // ignore: close_sinks
-    WebSocketChannel channel = IOWebSocketChannel.connect(
-        "ws://123.56.194.114:8081/UserWebSocket/user");
-    //监听函数
-    channel.stream.listen((event) {
-      // ignore: avoid_print
-      print(event);
-    }, //监听服务器消息
-        onError: (error) {
-      // ignore: avoid_print
-      print("服务器连接错误");
-    }, //连接错误时调用
-        onDone: () {
-      // ignore: avoid_print
-      print("服务器已关闭");
-    }, //关闭时调用
-        cancelOnError: true //设置错误时取消订阅
-        );
-  }
+class All extends StatelessWidget {
+  const All({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
