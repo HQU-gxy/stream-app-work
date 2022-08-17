@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
@@ -25,6 +27,7 @@ class _HomeState extends State<Home> {
   bool ai1 = false, ai2 = false, light = false, spray = false, undo = false;
   final channel =
       IOWebSocketChannel.connect("ws://123.56.194.114:8081/UserWebSocket/user");
+  StreamSubscription<dynamic>? _sub;
 
   final List<String> controlLst = [
     'doorheight',
@@ -97,40 +100,26 @@ class _HomeState extends State<Home> {
       .map((item) => ControlObject(item["picture"]!, item["name"]!))
       .toList();
 
-  //初始化，连接websocket
   @override
   void initState() {
     actions.asMap().forEach((idx, value) {
       controlObjects[idx].onPressed = (() => setState(() => value()));
     });
-    _socket();
+
+
+    _sub = channel.stream.listen((event) {
+      logger.d(event);
+    }, onError: (error) {
+      logger.d("服务器连接错误");
+    }, onDone: () {
+      logger.d("服务器已关闭");
+    }, cancelOnError: true);
 
     // ensure only landscape orientation
     WidgetsFlutterBinding.ensureInitialized();
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     super.initState();
-  }
-
-  void _socket() async {
-    // ignore: close_sinks
-    WebSocketChannel channel = IOWebSocketChannel.connect(
-        "ws://123.56.194.114:8081/UserWebSocket/user");
-    //监听函数
-    channel.stream.listen((event) {
-      // ignore: avoid_print
-      print(event);
-    }, //监听服务器消息
-        onError: (error) {
-      // ignore: avoid_print
-      print("服务器连接错误");
-    }, //连接错误时调用
-        onDone: () {
-      // ignore: avoid_print
-      print("服务器已关闭");
-    }, //关闭时调用
-        cancelOnError: true //设置错误时取消订阅
-        );
   }
 
   _postDateWithIndex(value, int n) async {
@@ -207,16 +196,15 @@ class _HomeState extends State<Home> {
                     Center(
                       child: Text(
                         '$windSpeed',
-                        style: const TextStyle(
-                            fontSize: 85, color: Colors.white),
+                        style:
+                            const TextStyle(fontSize: 85, color: Colors.white),
                       ),
                     ),
                     const Positioned(
                       right: 10,
                       bottom: 10,
                       child: Text('m/s',
-                          style: TextStyle(
-                              fontSize: 30, color: Colors.white)),
+                          style: TextStyle(fontSize: 30, color: Colors.white)),
                     )
                   ],
                 ),
@@ -326,6 +314,7 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
+    _sub?.cancel();
     channel.sink.close();
     super.dispose();
   }
