@@ -18,9 +18,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  num doorheight = 0;
-  double windspeed = 0.00;
-  num airvalve = 0;
+  num doorHeight = 0;
+  double windSpeed = 0.00;
+  num airValve = 0;
   bool ai1 = false, ai2 = false, light = false, spray = false, undo = false;
   final channel =
       IOWebSocketChannel.connect("ws://123.56.194.114:8081/UserWebSocket/user");
@@ -51,36 +51,36 @@ class _HomeState extends State<Home> {
 
   late List<VoidCallback> actions = [
     () {
-      if (windspeed < 20) {
-        windspeed++;
+      if (windSpeed < 20) {
+        windSpeed++;
       }
-      _postDateWithIndex(windspeed, 1);
+      _postDateWithIndex(windSpeed, 1);
     },
     () {
-      if (windspeed > 0) {
-        windspeed--;
+      if (windSpeed > 0) {
+        windSpeed--;
       }
-      _postDateWithIndex(windspeed, 1);
+      _postDateWithIndex(windSpeed, 1);
     },
     () {
-      windspeed = 20;
-      _postDateWithIndex(windspeed, 1);
+      windSpeed = 20;
+      _postDateWithIndex(windSpeed, 1);
     },
     () {
       ai1 = !ai1;
       _postDateWithIndex(ai1, 3);
     },
     () {
-      if (doorheight < 20) {
-        doorheight++;
+      if (doorHeight < 20) {
+        doorHeight++;
       }
-      _postDateWithIndex(doorheight, 0);
+      _postDateWithIndex(doorHeight, 0);
     },
     () {
-      if (doorheight > 0) {
-        doorheight--;
+      if (doorHeight > 0) {
+        doorHeight--;
       }
-      _postDateWithIndex(doorheight, 0);
+      _postDateWithIndex(doorHeight, 0);
     },
     () {
       ai2 = !ai2;
@@ -241,7 +241,7 @@ class _HomeState extends State<Home> {
                                 Align(
                                   alignment: Alignment.center,
                                   child: Text(
-                                    '$windspeed',
+                                    '$windSpeed',
                                     style: const TextStyle(
                                         fontSize: 85, color: Colors.white),
                                   ),
@@ -296,7 +296,7 @@ class _HomeState extends State<Home> {
                               right: 30,
                               bottom: 25,
                               child: Text(
-                                '$doorheight',
+                                '$doorHeight',
                                 style: const TextStyle(
                                     fontSize: 45, color: Colors.white),
                               )),
@@ -341,7 +341,7 @@ class _HomeState extends State<Home> {
                                 right: 30,
                                 bottom: 25,
                                 child: Text(
-                                  '$airvalve',
+                                  '$airValve',
                                   style: const TextStyle(
                                       fontSize: 45, color: Colors.white),
                                 )),
