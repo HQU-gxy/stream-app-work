@@ -1,10 +1,14 @@
+import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:work2/components/btn.dart';
+import 'logger.dart';
 import 'utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:quiver/iterables.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -21,54 +25,81 @@ class _HomeState extends State<Home> {
   final channel =
       IOWebSocketChannel.connect("ws://123.56.194.114:8081/UserWebSocket/user");
 
+  final List<String> controlLst = [
+    'doorheight',
+    'windspeed',
+    'airvalve',
+    'ai1',
+    'ai2',
+    'light',
+    'spray'
+  ];
+
+  final List<IMap<String, String>> controlMap = [
+    {"picture": "images/1.png", "name": "提高风速"},
+    {"picture": "images/2.png", "name": "降低风速"},
+    {"picture": "images/3.png", "name": "最高风速"},
+    {"picture": "images/4.png", "name": "自动"},
+    {"picture": "images/5.png", "name": "门升高"},
+    {"picture": "images/6.png", "name": "门下降"},
+    {"picture": "images/7.png", "name": "门停止"},
+    {"picture": "images/8.png", "name": "开灯"}
+  ].map((e) => e.lock).toList();
+
+  // late final m = controlMap
+  //     .zip<String, IMap<String, String>>(controlLst, (m, s) => m.add("apiName", s));
+
   late List<VoidCallback> actions = [
     () {
       if (windspeed < 20) {
         windspeed++;
       }
-      _postDate(windspeed, 1);
+      _postDateWithIndex(windspeed, 1);
     },
     () {
       if (windspeed > 0) {
         windspeed--;
       }
-      _postDate(windspeed, 1);
+      _postDateWithIndex(windspeed, 1);
     },
     () {
       windspeed = 20;
-      _postDate(windspeed, 1);
+      _postDateWithIndex(windspeed, 1);
     },
     () {
       ai1 = !ai1;
-      _postDate(ai1, 3);
+      _postDateWithIndex(ai1, 3);
     },
     () {
       if (doorheight < 20) {
         doorheight++;
       }
-      _postDate(doorheight, 0);
+      _postDateWithIndex(doorheight, 0);
     },
     () {
       if (doorheight > 0) {
         doorheight--;
       }
-      _postDate(doorheight, 0);
+      _postDateWithIndex(doorheight, 0);
     },
     () {
       ai2 = !ai2;
-      _postDate(ai2, 4);
+      _postDateWithIndex(ai2, 4);
     },
     () {
       light = !light;
-      _postDate(light, 5);
+      _postDateWithIndex(light, 5);
     }
   ];
+
+  late List<ControlObject> controlObjects =
+      controlMap.map((item) => ControlObject(item["picture"]!, item["name"]!)).toList();
 
   //初始化，连接websocket
   @override
   void initState() {
     actions.asMap().forEach((idx, value) {
-      controlObjects[idx].onPressed = (() => setState(() => value));
+      controlObjects[idx].onPressed = (() => setState(() => value()));
     });
     _socket();
     super.initState();
@@ -95,19 +126,10 @@ class _HomeState extends State<Home> {
         );
   }
 
-  _postDate(value, int n) async {
-    String date = value.toString();
-    try {
-      final response = await Dio().get(
-          'http://123.56.194.114:8081/api/device-data/send-command-data?shujv=${controlLst[n]}:$date');
-      // ignore: avoid_print
-      print(response.data);
-      // ignore: avoid_print
-      print(date);
-    } catch (e) {
-      // ignore: avoid_print
-      print(e);
-    }
+  _postDateWithIndex(value, int n) async {
+    final response = await Dio().get(
+        'http://123.56.194.114:8081/api/device-data/send-command-data?shujv=${controlLst[n]}:$value');
+    logger.d(response.data);
   }
 
   @override
@@ -167,9 +189,9 @@ class _HomeState extends State<Home> {
                 onPressed: () {
                   spray = !spray;
                   if (spray) {
-                    _postDate("mac1/mac2smoke1", 6);
+                    _postDateWithIndex("mac1/mac2smoke1", 6);
                   } else {
-                    _postDate("mac1/mac2smoke0", 6);
+                    _postDateWithIndex("mac1/mac2smoke0", 6);
                   }
                 },
               ),
