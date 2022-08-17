@@ -106,7 +106,6 @@ class _HomeState extends State<Home> {
       controlObjects[idx].onPressed = (() => setState(() => value()));
     });
 
-
     _sub = channel.stream.listen((event) {
       logger.d(event);
     }, onError: (error) {
@@ -134,6 +133,100 @@ class _HomeState extends State<Home> {
         color: const Color.fromARGB(255, 53, 91, 162),
         border: Border.all(width: 2.0, color: Colors.white24),
         borderRadius: const BorderRadius.all(Radius.circular(10)));
+
+    // TODO: refactor this three card
+    final windSpeedCard = Container(
+      decoration: cardDecoration,
+      margin: const EdgeInsets.fromLTRB(3, 0, 3, 3),
+      child: Stack(
+        children: [
+          Positioned(
+            left: 10,
+            bottom: 10,
+            child: Image.asset(
+              'images/wind_speed.png',
+              fit: BoxFit.fill,
+              scale: 2,
+            ),
+          ),
+          Center(
+            child: Text(
+              '$windSpeed',
+              style: const TextStyle(fontSize: 85, color: Colors.white),
+            ),
+          ),
+          const Positioned(
+            right: 10,
+            bottom: 10,
+            child: Text('m/s',
+                style: TextStyle(fontSize: 30, color: Colors.white)),
+          )
+        ],
+      ),
+    );
+
+    final airValveCard = Container(
+      decoration: cardDecoration,
+      margin: const EdgeInsets.all(3.0),
+      child: Stack(
+        children: [
+          Positioned(
+            left: 10,
+            bottom: 10,
+            child: Image.asset(
+              'images/air_valve.png',
+              fit: BoxFit.fill,
+              scale: 2,
+            ),
+          ),
+          Positioned(
+              right: 30,
+              bottom: 25,
+              child: Text(
+                '$airValve',
+                style: const TextStyle(fontSize: 45, color: Colors.white),
+              )),
+          const Positioned(
+            right: 5,
+            top: 0,
+            child:
+                Text('°', style: TextStyle(fontSize: 30, color: Colors.white)),
+          )
+        ],
+      ),
+    );
+
+    final doorHeightCard = Container(
+      decoration: cardDecoration,
+      margin: const EdgeInsets.all(3.0),
+      child: Stack(
+        children: [
+          Positioned(
+            left: 10,
+            bottom: 10,
+            child: Image.asset(
+              'images/door_height.png',
+              fit: BoxFit.fill,
+              scale: 2,
+            ),
+          ),
+          Positioned(
+              right: 30,
+              bottom: 25,
+              child: Text(
+                '$doorHeight',
+                style: const TextStyle(fontSize: 45, color: Colors.white),
+              )),
+          const Positioned(
+            right: 5,
+            top: 0,
+            child:
+                Text('cm', style: TextStyle(fontSize: 15, color: Colors.white)),
+          )
+        ],
+      ),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.main,
       appBar: AppBar(
@@ -149,7 +242,6 @@ class _HomeState extends State<Home> {
             );
           },
         ),
-        centerTitle: true,
         actions: [
           Row(
             children: <Widget>[
@@ -176,110 +268,20 @@ class _HomeState extends State<Home> {
         child: Column(
           // TODO: refactor this shit until I have time
           // DON'T USE MAGIC NUMBERS
-          children: <Widget>[
+          children: [
             Expanded(
               flex: 2,
-              child: Container(
-                decoration: cardDecoration,
-                margin: const EdgeInsets.fromLTRB(3, 0, 3, 3),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      left: 10,
-                      bottom: 10,
-                      child: Image.asset(
-                        'images/wind_speed.png',
-                        fit: BoxFit.fill,
-                        scale: 2,
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        '$windSpeed',
-                        style:
-                            const TextStyle(fontSize: 85, color: Colors.white),
-                      ),
-                    ),
-                    const Positioned(
-                      right: 10,
-                      bottom: 10,
-                      child: Text('m/s',
-                          style: TextStyle(fontSize: 30, color: Colors.white)),
-                    )
-                  ],
-                ),
-              ),
+              child: windSpeedCard,
             ),
             Expanded(
               flex: 1,
               child: Row(
                 children: [
                   Expanded(
-                      child: Container(
-                    decoration: cardDecoration,
-                    margin: const EdgeInsets.all(3.0),
-                    child: Stack(
-                      children: <Widget>[
-                        Positioned(
-                          left: 10,
-                          bottom: 10,
-                          child: Image.asset(
-                            'images/door_height.png',
-                            fit: BoxFit.fill,
-                            scale: 2,
-                          ),
-                        ),
-                        Positioned(
-                            right: 30,
-                            bottom: 25,
-                            child: Text(
-                              '$doorHeight',
-                              style: const TextStyle(
-                                  fontSize: 45, color: Colors.white),
-                            )),
-                        const Positioned(
-                          right: 5,
-                          top: 0,
-                          child: Text('cm',
-                              style:
-                                  TextStyle(fontSize: 15, color: Colors.white)),
-                        )
-                      ],
-                    ),
-                  )),
+                    child: doorHeightCard,
+                  ),
                   Expanded(
-                    child: Container(
-                      decoration: cardDecoration,
-                      margin: const EdgeInsets.all(3.0),
-                      child: Stack(
-                        children: <Widget>[
-                          Positioned(
-                            left: 10,
-                            bottom: 10,
-                            child: Image.asset(
-                              'images/air_valve.png',
-                              fit: BoxFit.fill,
-                              scale: 2,
-                            ),
-                          ),
-                          Positioned(
-                              right: 30,
-                              bottom: 25,
-                              child: Text(
-                                '$airValve',
-                                style: const TextStyle(
-                                    fontSize: 45, color: Colors.white),
-                              )),
-                          const Positioned(
-                            right: 5,
-                            top: 0,
-                            child: Text('°',
-                                style: TextStyle(
-                                    fontSize: 30, color: Colors.white)),
-                          )
-                        ],
-                      ),
-                    ),
+                    child: airValveCard,
                   ),
                 ],
               ),
