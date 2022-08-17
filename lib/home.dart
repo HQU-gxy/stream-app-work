@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'usful.dart';
+import 'package:work2/components/btn.dart';
+import 'utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
@@ -19,9 +20,56 @@ class _HomeState extends State<Home> {
   bool ai1 = false, ai2 = false, light = false, spray = false, undo = false;
   final channel =
       IOWebSocketChannel.connect("ws://123.56.194.114:8081/UserWebSocket/user");
+
+  late List<VoidCallback> actions = [
+    () {
+      if (windspeed < 20) {
+        windspeed++;
+      }
+      _postDate(windspeed, 1);
+    },
+    () {
+      if (windspeed > 0) {
+        windspeed--;
+      }
+      _postDate(windspeed, 1);
+    },
+    () {
+      windspeed = 20;
+      _postDate(windspeed, 1);
+    },
+    () {
+      ai1 = !ai1;
+      _postDate(ai1, 3);
+    },
+    () {
+      if (doorheight < 20) {
+        doorheight++;
+      }
+      _postDate(doorheight, 0);
+    },
+    () {
+      if (doorheight > 0) {
+        doorheight--;
+      }
+      _postDate(doorheight, 0);
+    },
+    () {
+      ai2 = !ai2;
+      _postDate(ai2, 4);
+    },
+    () {
+      light = !light;
+      _postDate(light, 5);
+    }
+  ];
+
   //初始化，连接websocket
   @override
   void initState() {
+    actions.asMap().forEach((idx, value) {
+      controlObjects[idx].onPressed = (() => setState(() => value));
+    });
     _socket();
     super.initState();
   }
@@ -289,142 +337,14 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-              const SizedBox(
-                height: 40,
-              ),
               Expanded(
                 flex: 1,
                 child: Row(
                   children: <Widget>[
-                    Expanded(
-                        child: Column(
-                      children: <Widget>[
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            shape:
-                                MaterialStateProperty.all(const CircleBorder()),
-                          ),
-                          onPressed: (() {
-                            setState(() {
-                              if (windspeed < 20) {
-                                windspeed++;
-                              }
-                              _postDate(windspeed, 1);
-                            });
-                          }),
-                          child: ClipOval(
-                            child: Image.asset(
-                              controlObjects[0]["picture"],
-                              height: 50,
-                              width: 50,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          controlObjects[0]["name"],
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      ],
-                    )),
-                    Expanded(
-                        child: Column(
-                      children: <Widget>[
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            shape:
-                                MaterialStateProperty.all(const CircleBorder()),
-                          ),
-                          onPressed: (() {
-                            setState(() {
-                              if (windspeed > 0) {
-                                windspeed--;
-                              }
-                              _postDate(windspeed, 1);
-                            });
-                          }),
-                          child: ClipOval(
-                            child: Image.asset(
-                              controlObjects[1]["picture"],
-                              height: 50,
-                              width: 50,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          controlObjects[1]["name"],
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      ],
-                    )),
-                    Expanded(
-                        child: Column(
-                      children: <Widget>[
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            shape:
-                                MaterialStateProperty.all(const CircleBorder()),
-                          ),
-                          onPressed: (() {
-                            setState(() {
-                              windspeed = 20;
-                              _postDate(windspeed, 1);
-                            });
-                          }),
-                          child: ClipOval(
-                            child: Image.asset(
-                              controlObjects[2]["picture"],
-                              height: 50,
-                              width: 50,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          controlObjects[2]["name"],
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      ],
-                    )),
-                    Expanded(
-                        child: Column(
-                      children: <Widget>[
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            shape:
-                                MaterialStateProperty.all(const CircleBorder()),
-                          ),
-                          onPressed: (() {
-                            setState(() {
-                              // ignore: unrelated_type_equality_checks
-                              ai1 = !ai1;
-                              _postDate(ai1, 3);
-                            });
-                          }),
-                          child: ClipOval(
-                            child: Image.asset(
-                              controlObjects[3]["picture"],
-                              height: 50,
-                              width: 50,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          controlObjects[3]["name"],
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      ],
-                    )),
+                    StupidButton(object: controlObjects[0]),
+                    StupidButton(object: controlObjects[1]),
+                    StupidButton(object: controlObjects[2]),
+                    StupidButton(object: controlObjects[3]),
                   ],
                 ),
               ),
@@ -432,138 +352,10 @@ class _HomeState extends State<Home> {
                 flex: 1,
                 child: Row(
                   children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          ElevatedButton(
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
-                                  const CircleBorder()),
-                            ),
-                            onPressed: (() {
-                              setState(() {
-                                if (doorheight < 20) {
-                                  doorheight++;
-                                }
-                                _postDate(doorheight, 0);
-                              });
-                            }),
-                            child: ClipOval(
-                              child: Image.asset(
-                                controlObjects[4]["picture"],
-                                height: 50,
-                                width: 50,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            controlObjects[4]["name"],
-                            style: const TextStyle(color: Colors.white),
-                          )
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          ElevatedButton(
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
-                                  const CircleBorder()),
-                            ),
-                            onPressed: (() {
-                              setState(() {
-                                if (doorheight > 0) {
-                                  doorheight--;
-                                }
-                                _postDate(doorheight, 0);
-                              });
-                            }),
-                            child: ClipOval(
-                              child: Image.asset(
-                                controlObjects[5]["picture"],
-                                height: 50,
-                                width: 50,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Text(
-                            controlObjects[5]["name"],
-                            style: const TextStyle(color: Colors.white),
-                          )
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          ElevatedButton(
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
-                                  const CircleBorder()),
-                            ),
-                            onPressed: (() {
-                              setState(() {
-                                ai2 = !ai2;
-                                _postDate(ai2, 4);
-                              });
-                            }),
-                            child: ClipOval(
-                              child: Image.asset(
-                                controlObjects[6]["picture"],
-                                height: 50,
-                                width: 50,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            controlObjects[6]["name"],
-                            style: const TextStyle(color: Colors.white),
-                          )
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          ElevatedButton(
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
-                                  const CircleBorder()),
-                            ),
-                            onPressed: (() {
-                              setState(() {
-                                light = !light;
-                                _postDate(light, 5);
-                              });
-                            }),
-                            child: ClipOval(
-                              child: Image.asset(
-                                controlObjects[7]["picture"],
-                                height: 50,
-                                width: 50,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            controlObjects[7]["name"],
-                            style: const TextStyle(color: Colors.white),
-                          )
-                        ],
-                      ),
-                    ),
+                    StupidButton(object: controlObjects[4]),
+                    StupidButton(object: controlObjects[5]),
+                    StupidButton(object: controlObjects[6]),
+                    StupidButton(object: controlObjects[7]),
                   ],
                 ),
               )
