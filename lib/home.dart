@@ -126,6 +126,7 @@ class _HomeState extends State<Home> {
         'http://123.56.194.114:8081/api/device-data/send-command-data?shujv=${controlLst[n]}:$value');
     logger.d(response.data);
   }
+  // 2085134861/2085176893/a23.2/63.8/548/34/1060/0/0/0/0/0/0/0/0s
 
   @override
   Widget build(BuildContext context) {
