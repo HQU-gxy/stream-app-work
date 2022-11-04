@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-
+import 'utils.dart';
 part 'venData.freezed.dart';
 
 @freezed
@@ -22,8 +22,19 @@ class VenData with _$VenData {
   String toString() {
     //        3323030949/3323030927  /z0.52           /40.2       /51           /1                /1           /1q
     final f = boolToNum(isLightOpen);
-    final s = '$mac1/$mac2/z${speed.toStringAsFixed(2)}/${distance.toStringAsFixed(1)}/$angle/$openControl/$mode/${f}q';
-    return s;
+    final s = '''
+    $mac1/
+    $mac2/
+    z${speed.toStringAsFixed(2)}/
+    ${distance.toStringAsFixed(1)}/
+    $angle/
+    $openControl/
+    $mode/
+    ${f}q
+    ''';
+    // remove all the line break and space
+    var r = s.replaceAll(RegExp(r"\r?\n|\r|  "), "");
+    return r;
   }
 
   static VenData? fromString(String s) {
@@ -56,17 +67,3 @@ class VenData with _$VenData {
     }
   }
 }
-
-extension on List<String> {
-  String pop() {
-    final val = first;
-    removeAt(0);
-    return val;
-  }
-}
-
-bool numToBool(int n) {
-  return n >= 1;
-}
-
-int boolToNum(bool b) => b ? 1 : 0;
