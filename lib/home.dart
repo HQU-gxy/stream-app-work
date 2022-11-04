@@ -1,10 +1,11 @@
 import 'dart:async';
-
 import 'package:dartx/dartx.dart';
 import 'package:dio/dio.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:work2/components/btn.dart';
+import 'package:work2/venData.dart';
 import 'constants.dart';
 import 'logger.dart';
 import 'controlObj.dart';
@@ -12,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:quiver/iterables.dart';
+import 'package:collection/collection.dart';
+import 'package:get/get.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -20,14 +23,18 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+class VenCtl extends GetxController {
+  final venData = VenData.newDefault().obs;
+  VenData getVenData() {
+    return venData.value;
+  }
+}
+
 class _HomeState extends State<Home> {
-  num doorHeight = 0;
-  double windSpeed = 0.00;
-  num airValve = 0;
-  bool ai1 = false, ai2 = false, light = false, spray = false, undo = false;
   final channel =
       IOWebSocketChannel.connect("ws://123.56.194.114:8081/UserWebSocket/user");
-  StreamSubscription<dynamic>? _sub;
+  final ctl = Get.put(VenCtl());
+  // The second map is a hack to tell it's a non null type
 
   final List<String> controlLst = [
     'doorheight',
@@ -54,45 +61,62 @@ class _HomeState extends State<Home> {
   //     .zip<String, IMap<String, String>>(controlLst, (m, s) => m.add("apiName", s));
 
   late List<VoidCallback> actions = [
+    // windup
     () {
-      if (windSpeed < 20) {
-        windSpeed++;
+      final state = ctl.getVenData();
+      print("state is ${state}");
+      if (state.speed < 20){
+        final newState = state.copyWith(speed: state.speed + 1);
+        channel.sink.add(newState.toString());
       }
-      _postDateWithIndex(windSpeed, 1);
     },
     () {
-      if (windSpeed > 0) {
-        windSpeed--;
+      final state = ctl.getVenData();
+      if (state.speed > 0 ){
+        final newState = state.copyWith(speed: state.speed - 1);
+        channel.sink.add(newState.toString());
       }
-      _postDateWithIndex(windSpeed, 1);
     },
     () {
-      windSpeed = 20;
-      _postDateWithIndex(windSpeed, 1);
+      // max
+      final state = ctl.getVenData();
+      final newState = state.copyWith(speed: 20);
+      channel.sink.add(newState.toString());
     },
     () {
-      ai1 = !ai1;
-      _postDateWithIndex(ai1, 3);
+      // auto
+      // not sure what to do
+      final state = ctl.getVenData();
+      final newState = state.copyWith(mode: 1);
+      channel.sink.add(newState.toString());
     },
     () {
-      if (doorHeight < 20) {
-        doorHeight++;
+      // door up
+      final state = ctl.getVenData();
+      if (state.distance < 20){
+        final newState = state.copyWith(distance: state.distance + 1);
+        channel.sink.add(newState.toString());
       }
-      _postDateWithIndex(doorHeight, 0);
     },
     () {
-      if (doorHeight > 0) {
-        doorHeight--;
+      // door down
+      final state = ctl.getVenData();
+      if (state.distance > 0){
+        final newState = state.copyWith(mode: 1);
+        channel.sink.add(newState.toString());
       }
-      _postDateWithIndex(doorHeight, 0);
     },
     () {
-      ai2 = !ai2;
-      _postDateWithIndex(ai2, 4);
+      //  no idea what this is
+      // how do you control the open and close of door?
+      // final state = ctl.getVenData();
+      // final newState = state.copyWith(mode: 1);
+      // channel.sink.add(newState.toString());
     },
     () {
-      light = !light;
-      _postDateWithIndex(light, 5);
+      final state = ctl.getVenData();
+      final newState = state.copyWith(isLightOpen: !state.isLightOpen);
+      channel.sink.add(newState.toString());
     }
   ];
 
@@ -105,14 +129,21 @@ class _HomeState extends State<Home> {
     actions.asMap().forEach((idx, value) {
       controlObjects[idx].onPressed = (() => setState(() => value()));
     });
-
-    _sub = channel.stream.listen((event) {
-      logger.d(event);
-    }, onError: (error) {
-      logger.d("服务器连接错误");
-    }, onDone: () {
-      logger.d("服务器已关闭");
-    }, cancelOnError: true);
+    late final ven = channel.stream.map((event) {
+      if (event is String){
+        final val = VenData.fromString(event);
+        if (val != null){
+          print("receive data: $val");
+        } else {
+          print("unknown message: $event");
+        }
+        return VenData.fromString(event);
+      } else {
+        print("unknown message: $event");
+        return null;
+      }
+    }).where((element) => element != null).map((e) => e!);
+    ctl.venData.bindStream(ven);
 
     // ensure only landscape orientation
     WidgetsFlutterBinding.ensureInitialized();
@@ -150,11 +181,14 @@ class _HomeState extends State<Home> {
               scale: 2,
             ),
           ),
-          Center(
-            child: Text(
-              '$windSpeed',
-              style: const TextStyle(fontSize: 85, color: Colors.white),
-            ),
+          // TODO: toFixed
+          Obx(()=>
+              Center(
+                child: Text(
+                  '${ctl.venData.value.speed}',
+                  style: const TextStyle(fontSize: 85, color: Colors.white),
+                ),
+              ),
           ),
           const Positioned(
             right: 10,
@@ -180,13 +214,15 @@ class _HomeState extends State<Home> {
               scale: 2,
             ),
           ),
-          Positioned(
-              right: 30,
-              bottom: 25,
-              child: Text(
-                '$airValve',
-                style: const TextStyle(fontSize: 45, color: Colors.white),
-              )),
+          Obx(()=>
+              Positioned(
+                  right: 30,
+                  bottom: 25,
+                  child: Text(
+                    '${ctl.venData.value.angle}',
+                    style: const TextStyle(fontSize: 45, color: Colors.white),
+                  )),
+          ),
           const Positioned(
             right: 5,
             top: 0,
@@ -211,13 +247,15 @@ class _HomeState extends State<Home> {
               scale: 2,
             ),
           ),
-          Positioned(
-              right: 30,
-              bottom: 25,
-              child: Text(
-                '$doorHeight',
-                style: const TextStyle(fontSize: 45, color: Colors.white),
-              )),
+          Obx(()=>
+              Positioned(
+                  right: 30,
+                  bottom: 25,
+                  child: Text(
+                    '${ctl.venData.value.distance}',
+                    style: const TextStyle(fontSize: 45, color: Colors.white),
+                  )),
+          ),
           const Positioned(
             right: 5,
             top: 0,
@@ -252,12 +290,9 @@ class _HomeState extends State<Home> {
               IconButton(
                 icon: const Icon(Icons.rss_feed_rounded),
                 onPressed: () {
-                  spray = !spray;
-                  if (spray) {
-                    _postDateWithIndex("mac1/mac2smoke1", 6);
-                  } else {
-                    _postDateWithIndex("mac1/mac2smoke0", 6);
-                  }
+                  final state = ctl.venData.value;
+                  final newState = state.copyWith(mode: 1);
+                  channel.sink.add(newState.toString());
                 },
               ),
             ],
@@ -317,7 +352,6 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    _sub?.cancel();
     channel.sink.close();
     super.dispose();
   }

@@ -62,8 +62,22 @@ class VenData with _$VenData {
         mode: mode,
         isLightOpen: isLightOpen,
       );
-    } on Exception catch (e) {
+    } on Exception catch (_e) {
+      return null;
+    } catch (_e) {
       return null;
     }
+  }
+  static VenData newDefault() {
+    return const VenData(
+      mac1: "0000000000",
+      mac2: "0000000000",
+      speed: 0.0,
+      distance: 0.0,
+      angle: 0,
+      openControl: 0,
+      mode: 0,
+      isLightOpen: false,
+    );
   }
 }
