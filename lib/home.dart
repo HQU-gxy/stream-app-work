@@ -15,6 +15,7 @@ import 'package:web_socket_channel/io.dart';
 import 'package:quiver/iterables.dart';
 import 'package:collection/collection.dart';
 import 'package:get/get.dart';
+import 'ctrlMsg.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -23,10 +24,24 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+final mac1 = "2085134861";
+final mac2 = "2507386961";
+
 class VenCtl extends GetxController {
   final venData = VenData.newDefault().obs;
+  final lastControlMsg = ControlMessage.newDefaultWithMac(mac1, mac2).obs;
   VenData getVenData() {
     return venData.value;
+  }
+  // you would use this to update the venData
+  // like copyWith
+  ControlMessage doWithControlMsg(ControlMessage Function(ControlMessage) f) {
+    final c = f(lastControlMsg.value);
+    lastControlMsg.value = c;
+    return c;
+  }
+  ControlMessage getControlMsg() {
+    return lastControlMsg.value;
   }
 }
 
@@ -57,66 +72,44 @@ class _HomeState extends State<Home> {
     {"picture": "images/8.png", "name": "开灯"}
   ].map((e) => e.lock).toList();
 
-  // late final m = controlMap
-  //     .zip<String, IMap<String, String>>(controlLst, (m, s) => m.add("apiName", s));
-
   late List<VoidCallback> actions = [
     // windup
     () {
-      final state = ctl.getVenData();
-      print("state is ${state}");
-      if (state.speed < 20){
-        final newState = state.copyWith(speed: state.speed + 1);
-        channel.sink.add(newState.toString());
-      }
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(angle: VentAngle.increase));
+      channel.sink.add(newMsg.toString());
     },
     () {
-      final state = ctl.getVenData();
-      if (state.speed > 0 ){
-        final newState = state.copyWith(speed: state.speed - 1);
-        channel.sink.add(newState.toString());
-      }
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(angle: VentAngle.decrease));
+      channel.sink.add(newMsg.toString());
     },
     () {
-      // max
-      final state = ctl.getVenData();
-      final newState = state.copyWith(speed: 20);
-      channel.sink.add(newState.toString());
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(angle: VentAngle.max));
+      channel.sink.add(newMsg.toString());
     },
     () {
       // auto
       // not sure what to do
-      final state = ctl.getVenData();
-      final newState = state.copyWith(mode: 1);
-      channel.sink.add(newState.toString());
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isAuto: !msg.isAuto));
+      channel.sink.add(newMsg.toString());
     },
     () {
       // door up
-      final state = ctl.getVenData();
-      if (state.distance < 20){
-        final newState = state.copyWith(distance: state.distance + 1);
-        channel.sink.add(newState.toString());
-      }
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.rise));
+      channel.sink.add(newMsg.toString());
     },
     () {
       // door down
-      final state = ctl.getVenData();
-      if (state.distance > 0){
-        final newState = state.copyWith(mode: 1);
-        channel.sink.add(newState.toString());
-      }
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.fall));
+      channel.sink.add(newMsg.toString());
     },
     () {
-      //  no idea what this is
-      // how do you control the open and close of door?
-      // final state = ctl.getVenData();
-      // final newState = state.copyWith(mode: 1);
-      // channel.sink.add(newState.toString());
+      // door stop
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.stop));
+      channel.sink.add(newMsg.toString());
     },
     () {
-      final state = ctl.getVenData();
-      final newState = state.copyWith(isLightOpen: !state.isLightOpen);
-      channel.sink.add(newState.toString());
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isLightOn: !msg.isLightOn));
+      channel.sink.add(newMsg.toString());
     }
   ];
 
