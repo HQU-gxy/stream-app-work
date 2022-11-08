@@ -89,26 +89,26 @@ class _HomeState extends State<Home> {
     () {
       // auto
       // not sure what to do
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isAuto: !msg.isAuto));
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isAuto: !msg.isAuto, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
       // door up
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.rise));
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.rise, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
       // door down
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.fall));
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.fall, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
       // door stop
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.stop));
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.stop, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isLightOn: !msg.isLightOn));
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isLightOn: !msg.isLightOn, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     }
   ];
