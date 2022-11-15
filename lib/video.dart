@@ -55,10 +55,22 @@ class _VideoState extends State<Video> {
           : const BoxDecoration(color: AppColors.main),
       child: Center(
         child: _controller?.value.isInitialized ?? false
-            ? AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
-                child: VideoPlayer(_controller!),
-              )
+            ?
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width/3 * 2) - 1, maxHeight: MediaQuery.of(context).size.height),
+              child:
+              UnconstrainedBox(
+                clipBehavior: Clip.antiAlias,
+                constrainedAxis: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: AspectRatio(
+                    aspectRatio: _controller!.value.aspectRatio,
+                    child: VideoPlayer(_controller!),
+                  ),
+                ),
+              ),
+            )
             : _loadingWidget(),
       ),
     ));
