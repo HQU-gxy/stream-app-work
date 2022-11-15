@@ -59,16 +59,12 @@ class _VideoState extends State<Video> {
             ConstrainedBox(
               constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width/3 * 2) - 1, maxHeight: MediaQuery.of(context).size.height),
               child:
-              UnconstrainedBox(
-                clipBehavior: Clip.antiAlias,
-                constrainedAxis: Axis.vertical,
-                child: SingleChildScrollView(
+                SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: AspectRatio(
                     aspectRatio: _controller!.value.aspectRatio,
                     child: VideoPlayer(_controller!),
                   ),
-                ),
               ),
             )
             : _loadingWidget(),
