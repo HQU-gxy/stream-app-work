@@ -263,31 +263,13 @@ class _HomeState extends State<Home> {
       backgroundColor: AppColors.main,
       appBar: AppBar(
         backgroundColor: AppColors.main,
-        leading: ElevatedButton(
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(AppColors.main)),
-          child: const Icon(Icons.settings),
-          onPressed: () {
-            Navigator.pushNamed(
-              context,
-              '/setting',
-            );
-          },
-        ),
         actions: [
           Row(
             children: <Widget>[
-              const Text(
-                '喷雾',
-              ),
-              IconButton(
-                icon: const Icon(Icons.rss_feed_rounded),
-                onPressed: () {
-                  final state = ctl.venData.value;
-                  final newState = state.copyWith(mode: 1);
-                  channel.sink.add(newState.toString());
-                },
-              ),
+              Row(children: [
+                const Icon(Icons.water_drop),
+                Switch(value: true, onChanged: (value) {}),
+              ],)
             ],
           )
         ],
