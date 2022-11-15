@@ -56,17 +56,13 @@ class _VideoState extends State<Video> {
       child: Center(
         child: _controller?.value.isInitialized ?? false
             ?
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width/3 * 2) - 1, maxHeight: MediaQuery.of(context).size.height),
-              child:
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: AspectRatio(
-                    aspectRatio: _controller!.value.aspectRatio,
-                    child: VideoPlayer(_controller!),
-                  ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: AspectRatio(
+                aspectRatio: _controller!.value.aspectRatio,
+                child: VideoPlayer(_controller!),
               ),
-            )
+              )
             : _loadingWidget(),
       ),
     ));
