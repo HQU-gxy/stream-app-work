@@ -24,15 +24,19 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-final mac1 = "2085134861";
-final mac2 = "2507386961";
+final mac1 = "B8D61AA021";
+final mac2 = "E831CD00AC84";
 
 class VenCtl extends GetxController {
+  final sprayState = false.obs;
+  final ventState = false.obs;
   final venData = VenData.newDefault().obs;
   final lastControlMsg = ControlMessage.newDefaultWithMac(mac1, mac2).obs;
+
   VenData getVenData() {
     return venData.value;
   }
+
   // you would use this to update the venData
   // like copyWith
   ControlMessage doWithControlMsg(ControlMessage Function(ControlMessage) f) {
@@ -40,6 +44,7 @@ class VenCtl extends GetxController {
     lastControlMsg.value = c;
     return c;
   }
+
   ControlMessage getControlMsg() {
     return lastControlMsg.value;
   }
@@ -47,8 +52,25 @@ class VenCtl extends GetxController {
 
 class _HomeState extends State<Home> {
   final channel =
-      IOWebSocketChannel.connect("ws://123.56.194.114:8081/UserWebSocket/user");
+      IOWebSocketChannel.connect("ws://123.56.194.114:8886");
+
+  void _setSprayState(bool state) {
+    String sprayMsg = "$mac1/${state ? "smoke1" : "smoke0"}";
+    print(sprayMsg);
+    channel.sink.add(sprayMsg);
+    ctl.sprayState.value = state;
+  }
+
+  void _setVenState(bool state){
+    var ctrlMsg = ctl.lastControlMsg.value.copyWith(isVentOn: state, angle:VentAngle.nc, door:DoorStatus.nc);
+    print(ctrlMsg);
+    channel.sink.add(ctrlMsg.toString());
+    ctl.lastControlMsg.value = ctrlMsg;
+    ctl.ventState.value = state;
+  }
+
   final ctl = Get.put(VenCtl());
+
   // The second map is a hack to tell it's a non null type
 
   final List<String> controlLst = [
@@ -75,40 +97,48 @@ class _HomeState extends State<Home> {
   late List<VoidCallback> actions = [
     // windup
     () {
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(angle: VentAngle.increase));
+      final newMsg = ctl.doWithControlMsg((msg) =>
+          msg.copyWith(angle: VentAngle.increase, door: DoorStatus.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(angle: VentAngle.decrease));
+      final newMsg = ctl.doWithControlMsg((msg) =>
+          msg.copyWith(angle: VentAngle.decrease, door: DoorStatus.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(angle: VentAngle.max));
+      final newMsg = ctl.doWithControlMsg(
+          (msg) => msg.copyWith(angle: VentAngle.max, door: DoorStatus.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
       // auto
       // not sure what to do
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isAuto: !msg.isAuto, angle: VentAngle.nc));
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(
+          isAuto: !msg.isAuto, angle: VentAngle.nc, door: DoorStatus.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
       // door up
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.rise, angle: VentAngle.nc));
+      final newMsg = ctl.doWithControlMsg(
+          (msg) => msg.copyWith(door: DoorStatus.rise, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
       // door down
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.fall, angle: VentAngle.nc));
+      final newMsg = ctl.doWithControlMsg(
+          (msg) => msg.copyWith(door: DoorStatus.fall, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
       // door stop
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(door: DoorStatus.stop, angle: VentAngle.nc));
+      final newMsg = ctl.doWithControlMsg(
+          (msg) => msg.copyWith(door: DoorStatus.stop, angle: VentAngle.nc));
       channel.sink.add(newMsg.toString());
     },
     () {
-      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(isLightOn: !msg.isLightOn, angle: VentAngle.nc));
+      final newMsg = ctl.doWithControlMsg((msg) => msg.copyWith(
+          isLightOn: !msg.isLightOn, angle: VentAngle.nc, door: DoorStatus.nc));
       channel.sink.add(newMsg.toString());
     }
   ];
@@ -116,41 +146,43 @@ class _HomeState extends State<Home> {
   late List<ControlObject> controlObjects = controlMap
       .map((item) => ControlObject(item["picture"]!, item["name"]!))
       .toList();
+  late StreamSubscription<VenData> ventSub;
 
   @override
   void initState() {
     actions.asMap().forEach((idx, value) {
       controlObjects[idx].onPressed = (() => setState(() => value()));
     });
-    late final ven = channel.stream.map((event) {
-      if (event is String){
-        final val = VenData.fromString(event);
-        if (val != null){
-          print("receive data: $val");
-        } else {
-          print("unknown message: $event");
-        }
-        return VenData.fromString(event);
-      } else {
-        print("unknown message: $event");
-        return null;
-      }
-    }).where((element) => element != null).map((e) => e!);
+    late final ven = channel.stream
+        .map((event) {
+          if (event is String) {
+            final val = VenData.fromString(event);
+            if (val != null) {
+              print("receive data: $val");
+            } else {
+              print("unknown message: $event");
+            }
+            return VenData.fromString(event);
+          } else {
+            print("unknown message: $event");
+            return null;
+          }
+        })
+        .where((element) => element != null)
+        .map((e) => e!)
+        .where((VenData el) => el.mac2 == mac2);
     ctl.venData.bindStream(ven);
+    ventSub = ven.listen((ev) {
+      ctl.ventState.value =  ev.isVentOn;
+    });
 
     // ensure only landscape orientation
     WidgetsFlutterBinding.ensureInitialized();
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+    _setSprayState(false);
     super.initState();
   }
-
-  _postDateWithIndex(value, int n) async {
-    final response = await Dio().get(
-        'http://123.56.194.114:8081/api/device-data/send-command-data?shujv=${controlLst[n]}:$value');
-    logger.d(response.data);
-  }
-  // 2085134861/2085176893/a23.2/63.8/548/34/1060/0/0/0/0/0/0/0/0s
 
   @override
   Widget build(BuildContext context) {
@@ -175,13 +207,13 @@ class _HomeState extends State<Home> {
             ),
           ),
           // TODO: toFixed
-          Obx(()=>
-              Center(
-                child: Text(
-                  '${ctl.venData.value.speed}',
-                  style: const TextStyle(fontSize: 85, color: Colors.white),
-                ),
+          Obx(
+            () => Center(
+              child: Text(
+                '${ctl.venData.value.speed}',
+                style: const TextStyle(fontSize: 85, color: Colors.white),
               ),
+            ),
           ),
           const Positioned(
             right: 10,
@@ -207,14 +239,14 @@ class _HomeState extends State<Home> {
               scale: 2,
             ),
           ),
-          Obx(()=>
-              Positioned(
-                  right: 30,
-                  bottom: 25,
-                  child: Text(
-                    '${ctl.venData.value.angle}',
-                    style: const TextStyle(fontSize: 45, color: Colors.white),
-                  )),
+          Obx(
+            () => Positioned(
+                right: 30,
+                bottom: 25,
+                child: Text(
+                  '${ctl.venData.value.angle}',
+                  style: const TextStyle(fontSize: 45, color: Colors.white),
+                )),
           ),
           const Positioned(
             right: 5,
@@ -240,14 +272,14 @@ class _HomeState extends State<Home> {
               scale: 2,
             ),
           ),
-          Obx(()=>
-              Positioned(
-                  right: 30,
-                  bottom: 25,
-                  child: Text(
-                    '${ctl.venData.value.distance}',
-                    style: const TextStyle(fontSize: 45, color: Colors.white),
-                  )),
+          Obx(
+            () => Positioned(
+                right: 30,
+                bottom: 25,
+                child: Text(
+                  '${ctl.venData.value.distance}',
+                  style: const TextStyle(fontSize: 45, color: Colors.white),
+                )),
           ),
           const Positioned(
             right: 5,
@@ -266,10 +298,26 @@ class _HomeState extends State<Home> {
         actions: [
           Row(
             children: <Widget>[
-              Row(children: [
-                const Icon(Icons.water_drop),
-                Switch(value: true, onChanged: (value) {}),
-              ],)
+              Row(
+                children: [
+                  const Icon(Icons.water_drop),
+                  Obx(
+                    () => Switch(
+                        value: ctl.sprayState.value,
+                        onChanged: (value) {
+                          _setSprayState(value);
+                        }),
+                  ),
+                  const Icon(Icons.man),
+                  Obx(
+                        () => Switch(
+                        value: ctl.ventState.value,
+                        onChanged: (value) {
+                          _setVenState(value);
+                        }),
+                  ),
+                ],
+              )
             ],
           )
         ],
@@ -328,6 +376,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     channel.sink.close();
+    ventSub.cancel();
     super.dispose();
   }
 }

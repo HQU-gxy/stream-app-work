@@ -17,7 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$ControlMessage {
   String get mac1 => throw _privateConstructorUsedError;
-  String get mac2 => throw _privateConstructorUsedError;
+  String get mac2 => throw _privateConstructorUsedError; // alias openControl
   bool get isVentOn => throw _privateConstructorUsedError;
   VentAngle get angle => throw _privateConstructorUsedError;
   DoorStatus get door => throw _privateConstructorUsedError;
@@ -186,6 +186,7 @@ class _$_ControlMessage extends _ControlMessage {
   final String mac1;
   @override
   final String mac2;
+// alias openControl
   @override
   final bool isVentOn;
   @override
@@ -239,7 +240,7 @@ abstract class _ControlMessage extends ControlMessage {
   String get mac1;
   @override
   String get mac2;
-  @override
+  @override // alias openControl
   bool get isVentOn;
   @override
   VentAngle get angle;

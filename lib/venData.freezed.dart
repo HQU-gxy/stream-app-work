@@ -20,8 +20,8 @@ mixin _$VenData {
   String get mac2 => throw _privateConstructorUsedError;
   double get speed => throw _privateConstructorUsedError; // speed per second
   double get distance => throw _privateConstructorUsedError;
-  int get angle => throw _privateConstructorUsedError;
-  int get openControl => throw _privateConstructorUsedError;
+  int get angle => throw _privateConstructorUsedError; // alias openControl
+  bool get isVentOn => throw _privateConstructorUsedError;
   int get mode => throw _privateConstructorUsedError;
   bool get isLightOpen => throw _privateConstructorUsedError;
 
@@ -40,7 +40,7 @@ abstract class $VenDataCopyWith<$Res> {
       double speed,
       double distance,
       int angle,
-      int openControl,
+      bool isVentOn,
       int mode,
       bool isLightOpen});
 }
@@ -63,7 +63,7 @@ class _$VenDataCopyWithImpl<$Res, $Val extends VenData>
     Object? speed = null,
     Object? distance = null,
     Object? angle = null,
-    Object? openControl = null,
+    Object? isVentOn = null,
     Object? mode = null,
     Object? isLightOpen = null,
   }) {
@@ -88,10 +88,10 @@ class _$VenDataCopyWithImpl<$Res, $Val extends VenData>
           ? _value.angle
           : angle // ignore: cast_nullable_to_non_nullable
               as int,
-      openControl: null == openControl
-          ? _value.openControl
-          : openControl // ignore: cast_nullable_to_non_nullable
-              as int,
+      isVentOn: null == isVentOn
+          ? _value.isVentOn
+          : isVentOn // ignore: cast_nullable_to_non_nullable
+              as bool,
       mode: null == mode
           ? _value.mode
           : mode // ignore: cast_nullable_to_non_nullable
@@ -117,7 +117,7 @@ abstract class _$$_VenDataCopyWith<$Res> implements $VenDataCopyWith<$Res> {
       double speed,
       double distance,
       int angle,
-      int openControl,
+      bool isVentOn,
       int mode,
       bool isLightOpen});
 }
@@ -137,7 +137,7 @@ class __$$_VenDataCopyWithImpl<$Res>
     Object? speed = null,
     Object? distance = null,
     Object? angle = null,
-    Object? openControl = null,
+    Object? isVentOn = null,
     Object? mode = null,
     Object? isLightOpen = null,
   }) {
@@ -162,10 +162,10 @@ class __$$_VenDataCopyWithImpl<$Res>
           ? _value.angle
           : angle // ignore: cast_nullable_to_non_nullable
               as int,
-      openControl: null == openControl
-          ? _value.openControl
-          : openControl // ignore: cast_nullable_to_non_nullable
-              as int,
+      isVentOn: null == isVentOn
+          ? _value.isVentOn
+          : isVentOn // ignore: cast_nullable_to_non_nullable
+              as bool,
       mode: null == mode
           ? _value.mode
           : mode // ignore: cast_nullable_to_non_nullable
@@ -187,7 +187,7 @@ class _$_VenData extends _VenData {
       required this.speed,
       required this.distance,
       required this.angle,
-      required this.openControl,
+      required this.isVentOn,
       required this.mode,
       required this.isLightOpen})
       : super._();
@@ -203,8 +203,9 @@ class _$_VenData extends _VenData {
   final double distance;
   @override
   final int angle;
+// alias openControl
   @override
-  final int openControl;
+  final bool isVentOn;
   @override
   final int mode;
   @override
@@ -221,8 +222,8 @@ class _$_VenData extends _VenData {
             (identical(other.distance, distance) ||
                 other.distance == distance) &&
             (identical(other.angle, angle) || other.angle == angle) &&
-            (identical(other.openControl, openControl) ||
-                other.openControl == openControl) &&
+            (identical(other.isVentOn, isVentOn) ||
+                other.isVentOn == isVentOn) &&
             (identical(other.mode, mode) || other.mode == mode) &&
             (identical(other.isLightOpen, isLightOpen) ||
                 other.isLightOpen == isLightOpen));
@@ -230,7 +231,7 @@ class _$_VenData extends _VenData {
 
   @override
   int get hashCode => Object.hash(runtimeType, mac1, mac2, speed, distance,
-      angle, openControl, mode, isLightOpen);
+      angle, isVentOn, mode, isLightOpen);
 
   @JsonKey(ignore: true)
   @override
@@ -246,7 +247,7 @@ abstract class _VenData extends VenData {
       required final double speed,
       required final double distance,
       required final int angle,
-      required final int openControl,
+      required final bool isVentOn,
       required final int mode,
       required final bool isLightOpen}) = _$_VenData;
   const _VenData._() : super._();
@@ -261,8 +262,8 @@ abstract class _VenData extends VenData {
   double get distance;
   @override
   int get angle;
-  @override
-  int get openControl;
+  @override // alias openControl
+  bool get isVentOn;
   @override
   int get mode;
   @override

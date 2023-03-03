@@ -13,7 +13,8 @@ class VenData with _$VenData {
     required double speed, // speed per second
     required double distance,
     required int angle,
-    required int openControl,
+    // alias openControl
+    required bool isVentOn,
     required int mode,
     required bool isLightOpen,
   }) = _VenData;
@@ -28,7 +29,7 @@ class VenData with _$VenData {
     z${speed.toStringAsFixed(2)}/
     ${distance.toStringAsFixed(1)}/
     $angle/
-    $openControl/
+    ${boolToNum(isVentOn)}/
     $mode/
     ${f}q
     ''';
@@ -46,7 +47,7 @@ class VenData with _$VenData {
       final speed = double.parse(speedWithZ.substring(1));
       final distance = double.parse(l.pop());
       final angle = int.parse(l.pop());
-      final openCtrl = int.parse(l.pop());
+      final openCtrl = int.parse(l.pop()) != 0;
       final mode = int.parse(l.pop());
       final isLightOpenWithQ = l.pop();
       int len = isLightOpenWithQ.length;
@@ -58,7 +59,7 @@ class VenData with _$VenData {
         speed: speed,
         distance: distance,
         angle: angle,
-        openControl: openCtrl,
+        isVentOn: openCtrl,
         mode: mode,
         isLightOpen: isLightOpen,
       );
@@ -75,7 +76,7 @@ class VenData with _$VenData {
       speed: 0.0,
       distance: 0.0,
       angle: 0,
-      openControl: 0,
+      isVentOn: false,
       mode: 0,
       isLightOpen: false,
     );

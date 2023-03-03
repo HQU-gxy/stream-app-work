@@ -18,6 +18,7 @@ enum VentAngle {
 
 // the door will keep rising or falling
 enum DoorStatus {
+  nc(0),
   rise(1),
   fall(2),
   stop(3);
@@ -31,6 +32,7 @@ class ControlMessage with _$ControlMessage {
   const factory ControlMessage({
     required String mac1,
     required String mac2,
+    // alias openControl
     required bool isVentOn,
     required VentAngle angle,
     required DoorStatus door,
